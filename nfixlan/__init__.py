@@ -10,8 +10,9 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'nflixlan.sqlite'),
-        DATA_PATH="D:\\Movies\\"
+        DATA_PATH="D:\\Movies"
     )
+    # app.use_x_sendfile = True
 
     if test_config is None:
         # load the instance config, if it exists, when not testing

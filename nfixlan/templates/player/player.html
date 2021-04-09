@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  {% if g.user %}
+	<h1>{{"Welcome " + g.user['username']}}</h1>
+  {% else %}
+	<h1>Welcome to your personal Netflix</h1>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+	<div>
+		<h1> {{title.split(".")[0]}} </h1>
+	</div>
+  {% if src != None %}
+	  <video
+		id="my-video"
+		class="video-js"
+		controls
+		width="auto"
+		height="auto"
+		preload="auto"
+		data-setup="{}"
+		autoplay=true
+		muted="muted"
+	  >
+		<source src="{{ url_for('player.src', src=src) }}" type="{{mime}}" />
+		<p class="vjs-no-js">
+		  To view this video please enable JavaScript, and consider upgrading to a
+		  web browser that
+		  <a href="https://videojs.com/html5-video-support/" target="_blank"
+			>supports HTML5 video</a
+		  >
+		</p>
+	  </video>
+
+	  <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+	  <script>
+		function update_history(time) {
+			src = '{{src}}';
+			history_id = {{history_id}};
+			var formData = new FormData();
+			formData.append("src", src);
+			formData.append("time", time);
+			formData.append("history_id", history_id);
+			
+			const Http = new XMLHttpRequest();
+			const url='{{url_for('player.update_history')}}';
+			Http.open("POST", url);
+			Http.send(formData);
+
+			Http.onreadystatechange = (e) => {
+			  console.log(Http.responseText)
+			}
+		}
+	  
+		document.addEventListener("DOMContentLoaded", function(event) {
+			// Your code to run since DOM is loaded and ready
+			var video = document.getElementById("my-video");
+			videojs(video, {}, function(){
+				this.on('loadedmetadata', function(){
+					this.currentTime({{time}});
+					this.fluid(true);
+				});
+			});
+			
+			setInterval(function(){
+				var video = videojs("my-video");
+				console.log(video.currentTime());
+				update_history(video.currentTime());
+			}, 1500);
+		});
+	  </script>
+  {% endif %}
+{% endblock %}

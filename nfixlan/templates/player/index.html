@@ -1,26 +1,54 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  {% if g.user %}
-	<h1>{{"Welcome " + g.user['username']}}</h1>
-  {% else %}
-	<h1>Welcome to your personal Netflix</h1>
-  {% endif %}
+	<div>
+		<h1> {{path.split("\\")[-1]}} </h1>
+	</div>
 {% endblock %}
 
 {% block content %}
-  {% for post in posts %}
+  {% if description != None or logo != None %}
+	<div class="about">
+		{% if logo != None %}
+			<img src="{{url_for('player.src', src=logo)}}" height = "30%">
+		{% endif %}
+		{% if description != None %}
+			<p class="body">{{ description }}</p>
+		{% endif %}
+	</div>
+  {% endif %}
+	<div class="about">
+		<p class="body">
+			<h1> Watch History: </h1>
+			<hr>
+		</p>
+	</div>
+  	<div class="about">
+		<p class="body">
+			<h1> Catalogue: </h1>
+			<hr>
+		</p>
+	</div>
+  {% for title in catalogue %}
     <article class="post">
       <header>
         <div>
-          <h1>{{ post['title'] }}</h1>
-          <div class="about">by {{ post['username'] }} on {{ post['created'].strftime('%Y-%m-%d') }}</div>
+          <h1>{{ title[0].split("\\")[-1] }}</h1>
+          <div class="about">
+			{% if title[1] == False %}
+				{% if title[2] != None %}
+					<img src="{{url_for('player.src', src=title[2])}}" height = "15%">
+				{% endif %}
+			{% endif %}
+		  </div>
         </div>
-        {% if g.user['id'] == post['author_id'] %}
-          <a class="action" href="{{ url_for('blog.update', id=post['id']) }}">Edit</a>
-        {% endif %}
+        {% if title[1] == False %}
+          <a class="action" href="{{ url_for('player.index', data_path=title[0]) }}">Explore</a>
+		{% else %}
+		  <a class="action" href="{{ url_for('player.play', src=title[0]) }}">Watch</a>
+		{% endif %}
       </header>
-      <p class="body">{{ post['body'] }}</p>
+      <p class="body">{{ title[3] }}</p>
     </article>
     {% if not loop.last %}
       <hr>
