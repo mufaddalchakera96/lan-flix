@@ -10,7 +10,7 @@
   {% if description != None or logo != None %}
 	<div class="about">
 		{% if logo != None %}
-			<img src="{{url_for('player.src', src=logo)}}" height = "30%">
+			<img class="mainposter" src="{{url_for('player.src', src=logo)}}">
 		{% endif %}
 		{% if description != None %}
 			<p class="body">{{ description }}</p>

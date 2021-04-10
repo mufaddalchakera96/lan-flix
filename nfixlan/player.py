@@ -62,8 +62,10 @@ def index():
             with open(path, "r") as description_f:
                 description = description_f.read()
         elif(is_file):
-            l = [path, True, None, None]
-            catalogue.append(l)
+            mime = mimetypes.guess_type(path)[0]
+            if(mime != None and mime.find("video") != -1):
+                l = [path, True, None, None]
+                catalogue.append(l)
         else:
             d = "No Description"
             if os.path.isfile(path + "\\description.txt"):
