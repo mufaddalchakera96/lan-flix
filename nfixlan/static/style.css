@@ -24,3 +24,15 @@ nav ul li a, nav ul li span, header .action { display: block; padding: 0.5rem; }
 .content textarea { min-height: 12em; resize: vertical; }
 input.danger { color: #cc2f2e; }
 input[type=submit] { align-self: start; min-width: 10em; }
+table, th, td {
+  border: 1px solid black;
+  table-layout: fixed;
+  width: 100%;
+  word-break: break-all;
+  padding: 10px;
+}
+.poster {
+	width: 100%;
+    display: block;
+    height: auto;
+}

@@ -20,19 +20,33 @@ def index():
     history = []
     catalogue = []
     data_path = request.args.get('data_path')
+    send_history = False
     if(data_path is None):
         data_path = current_app.config['DATA_PATH']
+        send_history = True
     description = None
     logo = None
     
+    if(send_history):
+        entries = db.execute(
+                'SELECT * FROM watch_history WHERE user_id = ? ORDER BY created DESC', (user_id,)
+        ).fetchall()
+        for row in entries:
+            l = [row['title'], True, None, None]
+            history.append(l)
+    
+    # The way this catalogue works is probably bad.. need to add code
+    # for bookkeeping these things in a db, and then fetch from the db.
+    # This hack works for now. 
     for f in os.listdir(data_path):
         path = ""
         if(data_path[-1] == "\\"):
             path = data_path + f
         else:
             path = data_path + "\\" + f
+        
         is_file = os.path.isfile(path)
-        print(path, is_file)
+        
         if(is_file and f == "logo.png"):
             logo = path
         elif(is_file and f == "description.txt"):
@@ -48,8 +62,21 @@ def index():
                     d = description_f.read()
             l = [path, False, (path + "\\logo.png") if os.path.isfile(path + "\\logo.png") else None, d]
             catalogue.append(l)
-            
-    return render_template('player/index.html', path = data_path, catalogue = catalogue, history = history, description = description, logo = logo)
+
+    #this below is the worst way of doing this one could possibly do,
+    #but it was 2AM in the night and I couldn't be bothered with HTML
+    #so this is the laziest way I could come up with.
+    i = 0
+    data = []
+    while(i < len(history) or i < len(catalogue)):
+        l = [None, None]
+        if(i < len(catalogue)):
+            l[0] = catalogue[i]
+        if(i < len(history)):
+            l[1] = history[i]
+        data.append(l)
+        i += 1
+    return render_template('player/index.html', path = data_path, data = data, description = description, logo = logo)
     
     
 @bp.route('/play', methods=('GET', 'POST'))
@@ -67,7 +94,6 @@ def play():
             'SELECT * FROM watch_history WHERE user_id = ? and title=?', (user_id,src,)
     ).fetchone()
     if entry != None:
-        # print("Found following seek time: " + str(entry['seek_position']))
         time = entry['seek_position']
         history_id = entry['id']
     else:
@@ -87,24 +113,20 @@ def play():
 @login_required
 def update_history():
     if request.method == "POST":
-        src = request.form['src']
         time = request.form['time']
         history_id = request.form['history_id']
-        user_id = g.user['id']
         db = get_db()
         entry = db.execute(
             'SELECT * FROM watch_history WHERE id=?', (history_id,)
         ).fetchone()
         if(entry != None):
-            #run update query
-            # print("updating", entry)
             db.execute(
                 'UPDATE watch_history SET created = ?, seek_position = ? WHERE id=?',
                 (datetime.datetime.now(), time, history_id,)
             )
             db.commit()
         else:
-            flash("Something is wrong")
+            return "Something is Wrong"
     return "Successful"
 
 @bp.route('/src', methods=('GET', 'POST'))
@@ -116,18 +138,3 @@ def src():
     print(directory, file)
     return send_from_directory(directory,
                                file, as_attachment = True)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

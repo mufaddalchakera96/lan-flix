@@ -12,7 +12,6 @@ def create_app(test_config=None):
         DATABASE=os.path.join(app.instance_path, 'nflixlan.sqlite'),
         DATA_PATH="D:\\Movies"
     )
-    # app.use_x_sendfile = True
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -26,11 +25,6 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-
-    # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
 
     db.init_app(app)
     app.register_blueprint(auth.bp)
